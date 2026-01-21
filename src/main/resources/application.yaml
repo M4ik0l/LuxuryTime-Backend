@@ -1,0 +1,50 @@
+#Server
+server:
+  port: 8080
+  error:
+    include-message: always
+
+spring:
+  application:
+    name: LuxuryTime
+  #Database
+  datasource:
+    url: jdbc:mysql://localhost:3306/luxurytime_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: "root"
+    password: "WatchDB!"
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  #JPA
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.MySQLDialect
+    open-in-view: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://localhost:8180/realms/luxurytime-backend/protocol/openid-connect/certs
+          issuer-uri: http://localhost:8180/realms/luxurytime-backend
+  graphql:
+    cors:
+      allowed-origins: http://localhost:4200
+jwt:
+  auth:
+    converter:
+      resource-id: luxurytime-backend
+      principal-attribute: preferred_username
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web : DEBUG
+      hibernate :
+        sql : DEBUG
+
+
