@@ -1,9 +1,8 @@
-package com.example.storebackend.Support.Exceptions;
+package watchs.luxurytime.Support.exceptions;
 
 public class OrdineInesistenteException extends Exception{
 
     public OrdineInesistenteException(){
         super();
-        System.out.println("L'ordine cercato non esiste");
     }
 }

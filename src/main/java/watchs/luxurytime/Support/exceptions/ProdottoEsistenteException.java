@@ -1,8 +1,7 @@
-package com.example.storebackend.Support.Exceptions;
+package watchs.luxurytime.Support.exceptions;
 
 public class ProdottoEsistenteException extends Exception{
     public ProdottoEsistenteException() {
         super();
-        System.out.println("Prodotto già esistente.");
     }
 }

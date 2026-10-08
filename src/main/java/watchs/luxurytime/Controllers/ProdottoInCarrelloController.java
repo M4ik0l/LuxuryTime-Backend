@@ -1,83 +1,61 @@
 package watchs.luxurytime.Controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
+import watchs.luxurytime.Entities.Prodotto;
+import watchs.luxurytime.Entities.ProdottoInCarrello;
+import watchs.luxurytime.Services.ProdottoInCarrelloService;
+import watchs.luxurytime.Services.ProdottoService;
+import watchs.luxurytime.Support.Messaggio;
+import watchs.luxurytime.Support.exceptions.ProdottoEsauritoException;
+import watchs.luxurytime.Support.exceptions.ProdottoInesistenteException;
+import watchs.luxurytime.Support.exceptions.UtenteInesistenteException;
 
 import java.util.List;
 
-@CrossOrigin
 @RestController
 @RequestMapping("/carrello")
-public class ProdottoNelCarrelloController {
+public class ProdottoInCarrelloController {
 
-    @Autowired
-    private ProdottoInCarrelloService prodottoInCarrelloService;
+    private final ProdottoInCarrelloService prodottoInCarrelloService;
+    private final ProdottoService prodottoService;
 
-    @Autowired
-    private ProdottoService prodottoService;
+    public ProdottoInCarrelloController(ProdottoInCarrelloService prodottoInCarrelloService, ProdottoService prodottoService) {
+        this.prodottoService = prodottoService;
+        this.prodottoInCarrelloService = prodottoInCarrelloService;
+    }
 
     @GetMapping("/get_carrello")
-    public ResponseEntity<?> getCarrello(@RequestParam(value="email",required=true) String email){
-        try{
-            List<ProdottoInCarrello> ris = prodottoInCarrelloService.getCarrello(email);
-            return new ResponseEntity<>(ris, HttpStatus.OK);
-        }catch(UtenteInesistenteException e){
-            return new ResponseEntity<>(new Messaggio("Utente inesistente!"),HttpStatus.BAD_REQUEST);
-        }
+    public ResponseEntity<List<ProdottoInCarrello>> getCarrello(@AuthenticationPrincipal Jwt principal) throws UtenteInesistenteException {
+        String email = principal.getClaimAsString("email");
+        return ResponseEntity.ok(prodottoInCarrelloService.getCarrello(email));
     }
 
     @DeleteMapping("/elimina")
-    public ResponseEntity<Messaggio> eliminaDaCarrello(@RequestParam(value="email",required=true)String email,
-                                                       @RequestParam(value="codice",required = true) int codice){
-        try{
-            List<ProdottoInCarrello> lista = prodottoInCarrelloService.getCarrello(email);
-            for(ProdottoInCarrello pic:lista)
-                if(pic.getId()==codice){
-                    prodottoInCarrelloService.diminuisciQuantitaProdottoInCarrello(email,pic);
-                    return new ResponseEntity<>(new Messaggio("Prodotto eliminato dal carrello."), HttpStatus.OK);
-                }
-        } catch (UtenteInesistenteException e) {
-            return new ResponseEntity<>(new Messaggio("Utente Inesistente."), HttpStatus.BAD_REQUEST);
-        } catch (ProdottoInesistenteException e) {
-            return new ResponseEntity<>(new Messaggio("Prodotto Inesistente."), HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(new Messaggio("Prodotto nel carrello non eliminato."), HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Messaggio> eliminaDaCarrello(@AuthenticationPrincipal Jwt principal, @RequestParam(value="codice") int codice) {
+        String email = principal.getClaimAsString("email");
+        prodottoInCarrelloService.diminuisciQuantitaProdottoInCarrello(codice, email);
+        return new ResponseEntity<>(new Messaggio("Quantità diminuita."), HttpStatus.OK);
     }
 
     @DeleteMapping("/elimina_tutto")
-    public ResponseEntity<Messaggio> eleiminatutto(@RequestParam(value="email",required = true) String email,
-                                                   @RequestParam(value="codice",required = true) int codice){
-        try {
-            List<ProdottoInCarrello> lista = prodottoInCarrelloService.getCarrello(email);
-            for(ProdottoInCarrello pic : lista){
-                if(pic.getId()==codice){
-                    prodottoInCarrelloService.rimuoviProdottoInCarrello(pic);
-                    return new ResponseEntity<>(new Messaggio("Prodotto eliminato dal carrello."), HttpStatus.OK);
-                }
-            }
-        } catch (UtenteInesistenteException e) {
-            return new ResponseEntity<>(new Messaggio("Utente Inesistente"), HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(new Messaggio("Prodotto nel carrello non eliminato"),HttpStatus.BAD_REQUEST);
+    public ResponseEntity<Messaggio> eliminatutto(@AuthenticationPrincipal Jwt principal, @RequestParam(value="codice") int codice) {
+        String email = principal.getClaimAsString("email");
+        prodottoInCarrelloService.rimuoviProdottoInCarrello(codice, email);
+        return ResponseEntity.ok(new Messaggio("Prodotto rimosso dal carrello."));
     }
 
     @PostMapping("/add_prodotto")
-    public ResponseEntity<Messaggio> addProdotto(@RequestParam(value="email") String email,
+    public ResponseEntity<Messaggio> addProdotto(@AuthenticationPrincipal Jwt principal,
                                                  @RequestParam(value="codice") int codice,
-                                                 @RequestParam(value="quantita") int quantita){
-        try{
-            Prodotto p = prodottoService.getProdottoById(codice);
-            prodottoInCarrelloService.add(email, p, quantita);
-        }catch (UtenteInesistenteException e) {
-            return new ResponseEntity(new Messaggio("Utente non trovato."),HttpStatus.BAD_REQUEST);
-        } catch (ProdottoInesistenteException e) {
-            return new ResponseEntity(new Messaggio("Prodotto inesistente."),HttpStatus.BAD_REQUEST);
-        } catch (ProdottoEsauritoException e) {
-            return new ResponseEntity(new Messaggio("Quantità non disponibile."),HttpStatus.BAD_REQUEST);
-        }
-        return new ResponseEntity<>(new Messaggio("Prodotto aggiunto al carrello!"), HttpStatus.OK);
+                                                 @RequestParam(value="quantita") int quantita)
+            throws UtenteInesistenteException, ProdottoInesistenteException, ProdottoEsauritoException {
+        String email = principal.getClaimAsString("email");
+        Prodotto p = prodottoService.getProdottoById(codice);
+        prodottoInCarrelloService.add(email, p, quantita);
+        return ResponseEntity.ok(new Messaggio("Prodotto aggiunto al carrello!"));
     }
-
 }

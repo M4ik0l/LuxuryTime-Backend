@@ -1,8 +1,7 @@
-package com.example.storebackend.Support.Exceptions;
+package watchs.luxurytime.Support.exceptions;
 
 public class CarrelloVuotoException extends Exception{
     public CarrelloVuotoException() {
         super();
-        System.out.println("Il Carrello è vuoto!");
     }
 }

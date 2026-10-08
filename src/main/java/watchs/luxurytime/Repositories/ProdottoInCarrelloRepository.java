@@ -1,24 +1,21 @@
 package watchs.luxurytime.Repositories;
 
-import org.springframework.stereotype.Repository;
-import watchs.luxurytime.Entities.Prodotto;
-import watchs.luxurytime.Entities.Utente;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import watchs.luxurytime.Entities.Ordine;
+import watchs.luxurytime.Entities.Prodotto;
+import watchs.luxurytime.Entities.ProdottoInCarrello;
+import watchs.luxurytime.Entities.Utente;
+import java.util.List;
 
 @Repository
-public interface ProdottoInCarrelloRepository extends JpaRepository<ProdottoInCarrello, Integer>  {
-
-    @Override
-    boolean existsById(int id);
+public interface ProdottoInCarrelloRepository extends JpaRepository<ProdottoInCarrello, Integer> {
 
     ProdottoInCarrello findById(int id);
 
-    @Override
-    void deleteById(int id);
-
     ProdottoInCarrello findByUtenteAndProdottoAndOrdine(Utente u, Prodotto p, Ordine o);
 
-    ProdottoInCarrello findByProdottoAndOrdine(Prodotto p, Ordine o);
-
+    List<ProdottoInCarrello> findByUtenteAndOrdineIsNull(Utente utente);
 
 }

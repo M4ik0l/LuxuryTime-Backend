@@ -1,9 +1,8 @@
-package com.example.storebackend.Support.Exceptions;
+package watchs.luxurytime.Support.exceptions;
 
 public class IndirizzoEsistenteException extends Exception{
 
     public IndirizzoEsistenteException(){
         super();
-        System.out.println("L'indirizzo indicato esiste già e non è valido");
     }
 }

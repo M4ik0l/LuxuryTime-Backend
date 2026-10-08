@@ -1,9 +1,12 @@
-package com.example.storebackend.Support.Exceptions;
+package watchs.luxurytime.Support.exceptions;
 
-public class UtenteInesistenteException extends Exception{
+public class UtenteInesistenteException extends Exception {
 
-    public UtenteInesistenteException(){
+    public UtenteInesistenteException() {
         super();
-        System.out.println("L'utente non esiste");
+    }
+
+    public UtenteInesistenteException(String message) {
+        super(message);
     }
 }

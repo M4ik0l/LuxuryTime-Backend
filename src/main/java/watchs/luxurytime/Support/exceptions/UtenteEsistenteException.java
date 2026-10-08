@@ -1,9 +1,8 @@
-package com.example.storebackend.Support.Exceptions;
+package watchs.luxurytime.Support.exceptions;
 
 public class UtenteEsistenteException extends Exception{
 
     public UtenteEsistenteException(){
         super();
-        System.out.println("L'utente esiste già");
     }
 }
